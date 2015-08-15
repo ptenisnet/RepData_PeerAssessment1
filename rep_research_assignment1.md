@@ -31,7 +31,7 @@ daily_steps <-aggregate(act_data_no_na$steps, list(dates=act_data_no_na$date), s
 
 
 ```r
-hist(daily_steps$x, breaks=8, col="orange", border="brown")
+hist(daily_steps$x, breaks=15, col="orange", border="brown")
 ```
 
 ![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
@@ -58,7 +58,9 @@ Calculate 5 min average
 
 ```r
 five_min_avg <- aggregate(act_data_no_na[,1],  by=list(act_data_no_na$interval), FUN=mean)
+five_min_median <- aggregate(act_data_no_na[,1],  by=list(act_data_no_na$interval), FUN=median)
 colnames(five_min_avg) <- c("Interval", "AvgSteps")
+colnames(five_min_median) <- c("Interval", "AvgSteps")
 ```
 
 
@@ -92,8 +94,10 @@ sum(is.na(activity_data$steps))
 Replace NAs with 5 minute average values 
 
 ```r
+adjustment <- five_min_avg
 for(i in 1:nrow(act_data1)) {
-  if(is.na(act_data1[i,"steps"])) act_data1[i,"steps"] <- (five_min_avg[five_min_avg["Interval"]==act_data1[i,"interval"], "AvgSteps"])
+#  if(is.na(act_data1[i,"steps"])) act_data1[i,"steps"] <- (five_min_avg[five_min_avg["Interval"]==act_data1[i,"interval"], "AvgSteps"])
+  if(is.na(act_data1[i,"steps"])) act_data1[i,"steps"] <- (adjustment[adjustment["Interval"]==act_data1[i,"interval"], "AvgSteps"])
   }
 
 str(act_data1)
@@ -112,13 +116,11 @@ Recalculating with adjusted NA values
 
 ```r
 daily_steps <-aggregate(act_data1$steps, list(dates=act_data1$date), sum)
-#plot(daily_steps$dates, daily_steps$x, type="p")
-#plot(daily_steps$x,  type="h", main="Histogram of daily steps", xlab="days since beginning", ylab="Number of Steps")
 ```
 
 
 ```r
-hist(daily_steps$x, breaks=8, col="lightblue", border="darkblue")
+hist(daily_steps$x, breaks=15, col="lightblue", border="darkblue")
 ```
 
 ![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11.png) 
@@ -137,6 +139,10 @@ summary(daily_steps)
 ##  2012-10-06: 1   Max.   :21194  
 ##  (Other)   :55
 ```
+
+**Conclusion: Replacing NAs with the mean value for the interval does not significantly change the histogram.**
+
+
 
 Now, attach a factor for time of week (weekend/weekday)
 
